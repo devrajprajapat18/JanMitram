@@ -54,12 +54,12 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-accent transition-colors">
+                <a href="/student-dashboard" className="hover:text-accent transition-colors">
                   Find Internships
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-accent transition-colors">
+                <a href="/contact" className="hover:text-accent transition-colors">
                   Career Guidance
                 </a>
               </li>
@@ -70,13 +70,13 @@ export const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Connect</h3>
             <div className="flex gap-4">
-              <a href="#" className="hover:text-accent transition-colors">
+              <a href="https://www.linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="hover:text-accent transition-colors">
                 <Linkedin size={20} />
               </a>
-              <a href="#" className="hover:text-accent transition-colors">
+              <a href="https://twitter.com" target="_blank" rel="noreferrer" aria-label="Twitter" className="hover:text-accent transition-colors">
                 <Twitter size={20} />
               </a>
-              <a href="#" className="hover:text-accent transition-colors">
+              <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook" className="hover:text-accent transition-colors">
                 <Facebook size={20} />
               </a>
               <a href="mailto:contact@janmitram.com" className="hover:text-accent transition-colors">

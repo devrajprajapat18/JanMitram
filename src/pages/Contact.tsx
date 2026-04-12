@@ -162,13 +162,19 @@ const Contact = () => {
                 </h3>
                 <div className="flex gap-4">
                   <a
-                    href="#"
+                    href="https://www.linkedin.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="LinkedIn"
                     className="p-3 rounded-full bg-accent/10 hover:bg-accent hover:text-white transition-all"
                   >
                     <Linkedin className="h-5 w-5" />
                   </a>
                   <a
-                    href="#"
+                    href="https://twitter.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Twitter"
                     className="p-3 rounded-full bg-accent/10 hover:bg-accent hover:text-white transition-all"
                   >
                     <Twitter className="h-5 w-5" />

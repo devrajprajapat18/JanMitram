@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { JobCard } from "@/components/JobCard";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -14,80 +12,78 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  BriefcaseIcon,
-  FileText,
-  Award,
-  TrendingUp,
-  User,
-} from "lucide-react";
+import { BriefcaseIcon, FileText, Award, TrendingUp, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-
-const recommendedJobs = [
-  {
-    title: "Frontend Developer Intern",
-    company: "Tech Solutions Inc",
-    location: "Remote",
-    type: "Internship",
-    salary: "$800/month",
-    skills: ["React", "TypeScript", "Tailwind"],
-  },
-  {
-    title: "Data Analyst Intern",
-    company: "Data Insights Co",
-    location: "Hybrid",
-    type: "Internship",
-    salary: "$1000/month",
-    skills: ["Python", "SQL", "Excel"],
-  },
-  {
-    title: "UI/UX Designer",
-    company: "Creative Studio",
-    location: "On-site",
-    type: "Full-time",
-    salary: "$2500/month",
-    skills: ["Figma", "Adobe XD", "Prototyping"],
-  },
-];
-
-const applications = [
-  { id: 1, job: "Frontend Developer Intern", company: "Tech Solutions", status: "Under Review", date: "2024-01-15" },
-  { id: 2, job: "Backend Developer", company: "Cloud Systems", status: "Interview Scheduled", date: "2024-01-10" },
-  { id: 3, job: "Full Stack Developer", company: "StartUp Hub", status: "Applied", date: "2024-01-08" },
-];
-
-const analyticsData = [
-  { name: "Applied", value: 12 },
-  { name: "Under Review", value: 5 },
-  { name: "Interview", value: 3 },
-  { name: "Rejected", value: 2 },
-];
+import { applyToJob, getJobs, getMyApplications } from "@/lib/api";
+import type { Job, StudentApplication } from "@/types/api";
+import { useAuth } from "@/context/useAuth";
 
 const StudentDashboard = () => {
   const { toast } = useToast();
-  const [profileCompletion] = useState(75);
+  const { user } = useAuth();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [applications, setApplications] = useState<StudentApplication[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleApply = (jobTitle: string) => {
-    toast({
-      title: "Application Submitted!",
-      description: `Your application for ${jobTitle} has been submitted successfully.`,
-    });
-  };
+  const analyticsData = useMemo(() => {
+    const statusCount = new Map<string, number>();
+    for (const item of applications) {
+      statusCount.set(item.status, (statusCount.get(item.status) || 0) + 1);
+    }
+
+    return Array.from(statusCount.entries()).map(([name, value]) => ({ name, value }));
+  }, [applications]);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [jobsResult, appsResult] = await Promise.all([getJobs(), getMyApplications()]);
+        setJobs(jobsResult);
+        setApplications(appsResult);
+      } catch (error) {
+        toast({
+          title: "Failed to load dashboard",
+          description: error instanceof Error ? error.message : "Please refresh and try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadData();
+  }, [toast]);
+
+  async function handleApply(jobId: string) {
+    try {
+      await applyToJob(jobId);
+      const updatedApps = await getMyApplications();
+      setApplications(updatedApps);
+      toast({
+        title: "Application submitted",
+        description: "Your application has been recorded successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Could not apply",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    }
+  }
+
+  const appliedJobIds = new Set(applications.map((item) => item.job?._id));
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="pt-20 pb-8">
         <div className="container mx-auto px-4">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Welcome back, Student!
-            </h1>
-            <p className="text-muted-foreground">
-              Track your applications and discover new opportunities
-            </p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {user?.name || "Student"}!</h1>
+            <p className="text-muted-foreground">Track your applications and discover opportunities.</p>
           </div>
 
           <Tabs defaultValue="dashboard" className="space-y-6">
@@ -106,8 +102,8 @@ const StudentDashboard = () => {
                       <BriefcaseIcon className="h-6 w-6 text-accent" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-foreground">12</p>
-                      <p className="text-sm text-muted-foreground">Active Applications</p>
+                      <p className="text-2xl font-bold text-foreground">{applications.length}</p>
+                      <p className="text-sm text-muted-foreground">Applications</p>
                     </div>
                   </div>
                 </Card>
@@ -118,8 +114,8 @@ const StudentDashboard = () => {
                       <FileText className="h-6 w-6 text-secondary" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-foreground">3</p>
-                      <p className="text-sm text-muted-foreground">Interview Scheduled</p>
+                      <p className="text-2xl font-bold text-foreground">{jobs.length}</p>
+                      <p className="text-sm text-muted-foreground">Open Jobs</p>
                     </div>
                   </div>
                 </Card>
@@ -130,8 +126,8 @@ const StudentDashboard = () => {
                       <Award className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-foreground">8</p>
-                      <p className="text-sm text-muted-foreground">Skills Matched</p>
+                      <p className="text-2xl font-bold text-foreground">{analyticsData.length}</p>
+                      <p className="text-sm text-muted-foreground">Status Buckets</p>
                     </div>
                   </div>
                 </Card>
@@ -155,22 +151,30 @@ const StudentDashboard = () => {
             </TabsContent>
 
             <TabsContent value="opportunities">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recommendedJobs.map((job) => (
-                  <JobCard
-                    key={job.title}
-                    {...job}
-                    onApply={() => handleApply(job.title)}
-                  />
-                ))}
-              </div>
+              {isLoading ? (
+                <Card className="p-6">Loading jobs...</Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {jobs.map((job) => (
+                    <JobCard
+                      key={job._id}
+                      title={job.title}
+                      company={job.company}
+                      location={job.location}
+                      type={job.type}
+                      salary={job.salary}
+                      skills={job.skills}
+                      isApplied={appliedJobIds.has(job._id)}
+                      onApply={appliedJobIds.has(job._id) ? undefined : () => handleApply(job._id)}
+                    />
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="applications">
               <Card className="p-6 bg-card border-border">
-                <h3 className="text-lg font-semibold text-foreground mb-4">
-                  Your Applications
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground mb-4">Your Applications</h3>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -183,12 +187,12 @@ const StudentDashboard = () => {
                   <TableBody>
                     {applications.map((app) => (
                       <TableRow key={app.id}>
-                        <TableCell className="font-medium">{app.job}</TableCell>
-                        <TableCell>{app.company}</TableCell>
+                        <TableCell className="font-medium">{app.job?.title || "N/A"}</TableCell>
+                        <TableCell>{app.job?.company || "N/A"}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">{app.status}</Badge>
                         </TableCell>
-                        <TableCell>{app.date}</TableCell>
+                        <TableCell>{new Date(app.appliedAt).toLocaleDateString()}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -203,36 +207,8 @@ const StudentDashboard = () => {
                     <User className="h-12 w-12 text-accent" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-foreground">
-                      John Doe
-                    </h3>
-                    <p className="text-muted-foreground">student@example.com</p>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium">Profile Completion</span>
-                      <span className="text-sm text-muted-foreground">{profileCompletion}%</span>
-                    </div>
-                    <Progress value={profileCompletion} className="h-2" />
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-2">Skills</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {["React", "TypeScript", "Node.js", "Python", "SQL"].map((skill) => (
-                        <Badge key={skill} variant="secondary">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-2">Resume</h4>
-                    <Button variant="outline">Upload Resume</Button>
+                    <h3 className="text-xl font-semibold text-foreground">{user?.name || "Student"}</h3>
+                    <p className="text-muted-foreground">{user?.email || "student@example.com"}</p>
                   </div>
                 </div>
               </Card>

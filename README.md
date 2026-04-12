@@ -1,72 +1,155 @@
-# JanMitram
+# JanMitram (Production-Ready Version)
 
-## About the Project
+JanMitram is a campus placement platform with a real full-stack architecture:
+- Frontend: React + TypeScript + Vite
+- Backend: Node.js + Express + MongoDB
+- Auth: JWT with role-based access (student, recruiter, admin)
 
-JanMitram is a web-based platform created to make the **campus placement and internship process simple, transparent, and digital**.  
-In many colleges, placements are still managed using emails, Excel sheets, and messaging apps, which causes confusion, delays, and missed opportunities.
+## What Was Fixed
 
-This project brings everything into **one centralized system** for students, placement cells, faculty mentors, and recruiters.
+1. Real authentication (signup/login/logout) with JWT
+2. Protected routes and role-based access control
+3. Real backend APIs for jobs, applications, and analytics
+4. Mock data replaced with backend-driven UI flows
+5. Lint errors fixed and code quality improved
+6. Route-level lazy loading for better bundle performance
+7. Real error and success messages from API responses
+8. Basic tests and CI workflow added
+9. Hardcoded user profile replaced with authenticated user context
+10. Accessibility improvements for navigation controls and links
 
----
+## Project Structure
 
-## Why JanMitram?
+```text
+janmitram/
+  backend/
+    src/
+      app.js
+      server.js
+      config/
+        db.js
+        env.js
+      middleware/
+        auth.js
+        error.js
+      models/
+        User.js
+        Job.js
+        Application.js
+      routes/
+        auth.routes.js
+        jobs.routes.js
+        applications.routes.js
+        analytics.routes.js
+      seed/
+        seedData.js
+    .env.example
+    package.json
 
-The main problems we noticed were:
-- Students missing important updates and deadlines  
-- Placement cells spending too much time on manual work  
-- Recruiters struggling to find the right candidates  
-- No clear tracking of applications and outcomes  
+  src/
+    components/
+      ProtectedRoute.tsx
+      Navbar.tsx
+      JobCard.tsx
+      ...
+    context/
+      AuthContext.tsx
+      AuthContextBase.ts
+      useAuth.ts
+    lib/
+      api.ts
+    pages/
+      Login.tsx
+      StudentDashboard.tsx
+      RecruiterDashboard.tsx
+      AdminDashboard.tsx
+      Analytics.tsx
+      ...
+    types/
+      auth.ts
+      api.ts
+    test/
+      auth-context.test.tsx
+      setup.ts
 
-JanMitram solves these problems by automating routine tasks and giving everyone a clear, real-time view of the placement process.
+  .github/workflows/ci.yml
+  .env.example
+  vite.config.ts
+  vitest.config.ts
+```
 
----
+## How Frontend, Backend, and Database Connect
 
-## What the Platform Does
+1. User logs in from frontend (`src/pages/Login.tsx`).
+2. Frontend calls backend `/api/auth/login` (`src/lib/api.ts`).
+3. Backend verifies credentials from MongoDB (`backend/src/models/User.js`).
+4. Backend returns JWT token.
+5. Frontend stores token in `localStorage` and sends it in `Authorization: Bearer <token>` header for protected APIs.
+6. Backend middleware (`backend/src/middleware/auth.js`) validates token and role.
+7. Protected data (jobs, applications, analytics) is returned to the frontend dashboard pages.
 
-### Student Side
-- Create and manage a digital profile and resume  
-- View internship and job opportunities  
-- Apply with a single click  
-- Track application status in real time  
+## API Overview
 
-### Placement Cell / Admin Side
-- Manage companies and job postings  
-- Check student eligibility and approvals  
-- Schedule interviews automatically  
-- View placement progress through analytics  
+- `POST /api/auth/signup`
+- `POST /api/auth/login`
+- `GET /api/jobs` (auth required)
+- `POST /api/jobs` (recruiter/admin)
+- `POST /api/applications` (student)
+- `GET /api/applications/mine` (student)
+- `GET /api/applications/recruiter` (recruiter/admin)
+- `GET /api/analytics/summary` (admin)
 
-### Recruiter Side
-- Post job and internship openings  
-- Access verified student profiles  
-- Shortlist and manage candidates in one place  
+## Local Setup
 
----
+### 1. Frontend
 
-## Security & Data Safety
+```bash
+npm install
+copy .env.example .env
+npm run dev
+```
 
-Since student data is sensitive, the platform includes:
-- Secure login with role-based access  
-- Protected APIs using token-based authentication  
-- Encrypted data storage  
-- Activity logs for accountability  
+Frontend runs on `http://localhost:8080`.
 
----
+### 2. Backend
 
-## Tech Stack Used
+```bash
+cd backend
+npm install
+copy .env.example .env
+npm run dev
+```
 
-- **Frontend**: React, TypeScript, Vite  
-- **UI**: Tailwind CSS, shadcn-ui  
-- **Backend**: Node.js, Express  
-- **Database**: PostgreSQL  
-- **Analytics / AI**: Python-based recommendations and insights  
+Backend runs on `http://localhost:5000`.
 
----
+## Demo Users (Seeded Automatically)
 
-## Project Domain
+- Student: `student@janmitram.dev`
+- Recruiter: `recruiter@janmitram.dev`
+- Admin: `admin@janmitram.dev`
+- Password for all: `Password@123`
 
-- **Primary**: EduTech (Smart Education)  
-- **Support**: Cybersecurity (data protection and access control)
+## Quality Gates
 
----
+```bash
+npm run lint
+npm run test:run
+npm run build
+```
 
+## CI/CD
 
+GitHub Actions workflow is added at `.github/workflows/ci.yml`:
+- Lint
+- Test
+- Build
+- Backend syntax smoke check
+
+## Deployment Notes
+
+- Frontend can be deployed on Vercel/Netlify.
+- Backend can be deployed on Render/Railway/Azure App Service.
+- MongoDB Atlas is recommended for production DB.
+- Set production env vars:
+  - Frontend: `VITE_API_BASE_URL`
+  - Backend: `PORT`, `MONGODB_URI`, `JWT_SECRET`, `CLIENT_ORIGIN`

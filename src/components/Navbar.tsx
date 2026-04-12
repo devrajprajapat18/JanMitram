@@ -3,9 +3,20 @@ import { Button } from "@/components/ui/button";
 import { BrainCircuit, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/useAuth";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { isAuthenticated, user, logout } = useAuth();
+
+  const dashboardPath =
+    user?.role === "student"
+      ? "/student-dashboard"
+      : user?.role === "recruiter"
+      ? "/recruiter-dashboard"
+      : user?.role === "admin"
+      ? "/admin-dashboard"
+      : "/login";
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -30,17 +41,31 @@ export const Navbar = () => {
             <Link to="/analytics" className="text-foreground hover:text-primary transition-colors">
               Analytics
             </Link>
-            <Link to="/login">
-              <Button variant="default" className="gradient-primary">
-                Login
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <Link to={dashboardPath}>
+                  <Button variant="outline">Dashboard</Button>
+                </Link>
+                <Button variant="default" className="gradient-primary" onClick={logout}>
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Link to="/login">
+                <Button variant="default" className="gradient-primary">
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden p-2 text-foreground"
+            aria-label="Toggle navigation menu"
+            aria-expanded={isOpen}
+            aria-controls="mobile-nav"
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -55,6 +80,7 @@ export const Navbar = () => {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden bg-background border-t border-border"
+            id="mobile-nav"
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
               <Link
@@ -85,11 +111,29 @@ export const Navbar = () => {
               >
                 Analytics
               </Link>
-              <Link to="/login" onClick={() => setIsOpen(false)}>
-                <Button variant="default" className="w-full gradient-primary">
-                  Login
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link to={dashboardPath} onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" className="w-full">Dashboard</Button>
+                  </Link>
+                  <Button
+                    variant="default"
+                    className="w-full gradient-primary"
+                    onClick={() => {
+                      logout();
+                      setIsOpen(false);
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <Link to="/login" onClick={() => setIsOpen(false)}>
+                  <Button variant="default" className="w-full gradient-primary">
+                    Login
+                  </Button>
+                </Link>
+              )}
             </div>
           </motion.div>
         )}

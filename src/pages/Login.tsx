@@ -8,27 +8,52 @@ import { Card } from "@/components/ui/card";
 import { BrainCircuit, User, Building2, Shield } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/useAuth";
+import type { UserRole } from "@/types/auth";
 
 const Login = () => {
-  const [role, setRole] = useState<"student" | "recruiter" | "admin">("student");
+  const [role, setRole] = useState<UserRole>("student");
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login, signup } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    toast({
-      title: "Login Successful!",
-      description: `Welcome back as ${role}`,
-    });
 
-    // Navigate based on role
-    if (role === "student") {
-      navigate("/student-dashboard");
-    } else if (role === "recruiter") {
-      navigate("/recruiter-dashboard");
-    } else {
-      navigate("/admin-dashboard");
+    const form = new FormData(e.currentTarget);
+    const email = String(form.get("email") || "").trim();
+    const password = String(form.get("password") || "");
+    const name = String(form.get("name") || "").trim();
+
+    try {
+      if (mode === "signup" && role === "admin") {
+        throw new Error("Admin signup is restricted.");
+      }
+
+      const user =
+        mode === "signup"
+          ? await signup(name, email, password, role)
+          : await login(email, password);
+
+      toast({
+        title: mode === "signup" ? "Account created" : "Login successful",
+        description: `Welcome ${user.name}`,
+      });
+
+      if (user.role === "student") {
+        navigate("/student-dashboard");
+      } else if (user.role === "recruiter") {
+        navigate("/recruiter-dashboard");
+      } else {
+        navigate("/admin-dashboard");
+      }
+    } catch (error) {
+      toast({
+        title: "Authentication failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -45,7 +70,7 @@ const Login = () => {
         </Link>
 
         <Card className="p-8 shadow-green-lg">
-          <Tabs value={role} onValueChange={(v) => setRole(v as any)}>
+          <Tabs value={role} onValueChange={(v) => setRole(v as UserRole)}>
             <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="student" className="flex items-center gap-1">
                 <User className="h-4 w-4" />
@@ -61,23 +86,37 @@ const Login = () => {
               </TabsTrigger>
             </TabsList>
 
+            <div className="grid grid-cols-2 gap-2 mb-6">
+              <Button
+                type="button"
+                variant={mode === "login" ? "default" : "outline"}
+                onClick={() => setMode("login")}
+              >
+                Login
+              </Button>
+              <Button
+                type="button"
+                variant={mode === "signup" ? "default" : "outline"}
+                onClick={() => setMode("signup")}
+              >
+                Sign Up
+              </Button>
+            </div>
+
             <TabsContent value="student">
-              <LoginForm role="student" onSubmit={handleLogin} />
+              <LoginForm role="student" mode={mode} onSubmit={handleAuth} />
             </TabsContent>
             <TabsContent value="recruiter">
-              <LoginForm role="recruiter" onSubmit={handleLogin} />
+              <LoginForm role="recruiter" mode={mode} onSubmit={handleAuth} />
             </TabsContent>
             <TabsContent value="admin">
-              <LoginForm role="admin" onSubmit={handleLogin} />
+              <LoginForm role="admin" mode={mode} onSubmit={handleAuth} />
             </TabsContent>
           </Tabs>
         </Card>
 
         <p className="text-center mt-4 text-muted-foreground">
-          Don't have an account?{" "}
-          <a href="#" className="text-accent hover:underline">
-            Create Account
-          </a>
+          Use demo users from backend seed: student@janmitram.dev, recruiter@janmitram.dev, admin@janmitram.dev (password: Password@123)
         </p>
       </motion.div>
     </div>
@@ -86,17 +125,26 @@ const Login = () => {
 
 const LoginForm = ({
   role,
+  mode,
   onSubmit,
 }: {
-  role: string;
-  onSubmit: (e: React.FormEvent) => void;
+  role: UserRole;
+  mode: "login" | "signup";
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }) => {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
+      {mode === "signup" ? (
+        <div className="space-y-2">
+          <Label htmlFor="name">Full Name</Label>
+          <Input id="name" name="name" placeholder="Your full name" required className="bg-background" />
+        </div>
+      ) : null}
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
+          name="email"
           type="email"
           placeholder={`${role}@example.com`}
           required
@@ -107,24 +155,21 @@ const LoginForm = ({
         <Label htmlFor="password">Password</Label>
         <Input
           id="password"
+          name="password"
           type="password"
           placeholder="Enter your password"
           required
           className="bg-background"
         />
       </div>
-      <div className="flex items-center justify-between text-sm">
-        <label className="flex items-center gap-2">
-          <input type="checkbox" className="rounded" />
-          <span className="text-muted-foreground">Remember me</span>
-        </label>
-        <a href="#" className="text-accent hover:underline">
-          Forgot Password?
-        </a>
-      </div>
       <Button type="submit" className="w-full gradient-primary">
-        Login as {role}
+        {mode === "signup" ? `Create ${role} account` : `Login as ${role}`}
       </Button>
+      {mode === "signup" && role === "admin" ? (
+        <p className="text-xs text-muted-foreground text-center">
+          Admin accounts can only be created by an existing administrator.
+        </p>
+      ) : null}
     </form>
   );
 };

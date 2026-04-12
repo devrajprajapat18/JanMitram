@@ -11,6 +11,7 @@ interface JobCardProps {
   salary?: string;
   skills: string[];
   onApply?: () => void;
+  isApplied?: boolean;
 }
 
 export const JobCard = ({
@@ -21,6 +22,7 @@ export const JobCard = ({
   salary,
   skills,
   onApply,
+  isApplied,
 }: JobCardProps) => {
   return (
     <Card className="p-6 hover:shadow-green-md transition-all duration-300 bg-card border-border">
@@ -59,9 +61,10 @@ export const JobCard = ({
 
         <Button
           onClick={onApply}
+          disabled={isApplied}
           className="w-full gradient-primary"
         >
-          Apply Now
+          {isApplied ? "Already Applied" : "Apply Now"}
         </Button>
       </div>
     </Card>

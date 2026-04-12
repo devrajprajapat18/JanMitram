@@ -2,16 +2,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import StudentDashboard from "./pages/StudentDashboard";
-import RecruiterDashboard from "./pages/RecruiterDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import Analytics from "./pages/Analytics";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+import { Route, Routes } from "react-router-dom";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+
+const Home = lazy(() => import("./pages/Home.tsx"));
+const Login = lazy(() => import("./pages/Login.tsx"));
+const StudentDashboard = lazy(() => import("./pages/StudentDashboard.tsx"));
+const RecruiterDashboard = lazy(() => import("./pages/RecruiterDashboard.tsx"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard.tsx"));
+const Analytics = lazy(() => import("./pages/Analytics.tsx"));
+const About = lazy(() => import("./pages/About.tsx"));
+const Contact = lazy(() => import("./pages/Contact.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -20,20 +23,47 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/student-dashboard" element={<StudentDashboard />} />
-          <Route path="/recruiter-dashboard" element={<RecruiterDashboard />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/analytics" element={<Analytics />} />
+          <Route
+            path="/student-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <StudentDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/recruiter-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["recruiter"]}>
+                <RecruiterDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <Analytics />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
+      </Suspense>
     </TooltipProvider>
   </QueryClientProvider>
 );
