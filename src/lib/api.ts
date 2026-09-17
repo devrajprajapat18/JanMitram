@@ -1,9 +1,18 @@
 import type { AdminSummary, Job, RecruiterApplication, StudentApplication } from "@/types/api";
 import type { AuthResponse, UserRole } from "@/types/auth";
 
-const API_BASE_URL = import.meta.env.DEV
-  ? "/api"
-  : import.meta.env.VITE_API_BASE_URL || "/api";
+const API_BASE_URL = (() => {
+  const configured = [
+    import.meta.env.VITE_API_BASE_URL,
+    import.meta.env.VITE_API_URL,
+    import.meta.env.VITE_BACKEND_URL,
+    import.meta.env.REACT_APP_API_URL,
+    import.meta.env.NEXT_PUBLIC_API_URL,
+  ].find((value) => typeof value === "string" && value.trim().length > 0);
+
+  const base = (configured || (import.meta.env.DEV ? "/api" : "/api")).trim().replace(/\/+$/, "");
+  return base || "/api";
+})();
 
 function getToken() {
   return localStorage.getItem("janmitram_token");

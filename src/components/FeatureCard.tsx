@@ -1,30 +1,42 @@
 import { LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import { Card } from "@/components/ui/card";
 
 interface FeatureCardProps {
   icon: LucideIcon;
   title: string;
   description: string;
-  index: number;
+  index?: number;
+  iconBg?: string;
+  iconColor?: string;
 }
 
-export const FeatureCard = ({ icon: Icon, title, description, index }: FeatureCardProps) => {
+export const FeatureCard = ({
+  icon: Icon,
+  title,
+  description,
+  index = 0,
+  iconBg = "bg-[#ECFDF5]",
+  iconColor = "text-accent",
+}: FeatureCardProps) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
+      className="h-full"
     >
-      <Card className="p-6 hover:shadow-green-md transition-all duration-300 hover-scale bg-card border-border">
-        <div className="flex flex-col items-center text-center space-y-4">
-          <div className="p-3 rounded-full bg-accent/10">
-            <Icon className="h-8 w-8 text-accent" />
-          </div>
-          <h3 className="text-xl font-semibold text-foreground">{title}</h3>
-          <p className="text-muted-foreground">{description}</p>
+      <div className="h-full rounded-[18px] border border-border bg-white p-8 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg">
+        <div className={`flex items-center justify-center h-12 w-12 rounded-xl ${iconBg}`}>
+          <Icon className={`h-6 w-6 ${iconColor}`} />
         </div>
-      </Card>
+        <h3 className="mt-6 text-xl font-semibold text-foreground tracking-tight">
+          {title}
+        </h3>
+        <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground whitespace-pre-line">
+          {description}
+        </p>
+      </div>
     </motion.div>
   );
 };

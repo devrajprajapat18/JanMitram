@@ -1,93 +1,79 @@
 import { Link } from "react-router-dom";
-import { BrainCircuit, Linkedin, Twitter, Facebook, Mail } from "lucide-react";
+import { BrainCircuit, Linkedin, Github, Twitter } from "lucide-react";
 
 export const Footer = () => {
   return (
-    <footer className="bg-primary text-primary-foreground">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-background border-t border-border">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-10">
           {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <BrainCircuit className="h-6 w-6" />
-              <span className="text-lg font-bold">JanMitram</span>
-            </div>
-            <p className="text-sm opacity-90">
-              Empowering students and recruiters with AI-driven opportunities.
-            </p>
+          <Link to="/" className="flex items-center gap-2.5">
+            <span className="flex items-center justify-center h-8 w-8 rounded-lg bg-accent text-white">
+              <BrainCircuit className="h-4 w-4" />
+            </span>
+            <span className="text-lg font-bold text-foreground tracking-tight">
+              Jan<span className="text-accent">Mitram</span>
+            </span>
+          </Link>
+
+          {/* Center Links */}
+          <div className="flex items-center gap-8">
+            <Link
+              to="/"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Home
+            </Link>
+            <Link
+              to="/about"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              About
+            </Link>
+            <Link
+              to="/contact"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Contact
+            </Link>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link to="/" className="hover:text-accent transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="hover:text-accent transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/analytics" className="hover:text-accent transition-colors">
-                  Analytics
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="hover:text-accent transition-colors">
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* For Students */}
-          <div>
-            <h3 className="font-semibold mb-4">For Students</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link to="/login" className="hover:text-accent transition-colors">
-                  Student Login
-                </Link>
-              </li>
-              <li>
-                <a href="/student-dashboard" className="hover:text-accent transition-colors">
-                  Find Internships
-                </a>
-              </li>
-              <li>
-                <a href="/contact" className="hover:text-accent transition-colors">
-                  Career Guidance
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h3 className="font-semibold mb-4">Connect</h3>
-            <div className="flex gap-4">
-              <a href="https://www.linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="hover:text-accent transition-colors">
-                <Linkedin size={20} />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noreferrer" aria-label="Twitter" className="hover:text-accent transition-colors">
-                <Twitter size={20} />
-              </a>
-              <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook" className="hover:text-accent transition-colors">
-                <Facebook size={20} />
-              </a>
-              <a href="mailto:contact@janmitram.com" className="hover:text-accent transition-colors">
-                <Mail size={20} />
-              </a>
-            </div>
+          {/* Social Icons */}
+          <div className="flex items-center gap-3">
+            <a
+              href="https://www.linkedin.com"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="LinkedIn"
+              className="flex items-center justify-center h-9 w-9 rounded-full border border-border text-muted-foreground hover:text-accent hover:border-accent transition-colors"
+            >
+              <Linkedin size={16} />
+            </a>
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="GitHub"
+              className="flex items-center justify-center h-9 w-9 rounded-full border border-border text-muted-foreground hover:text-accent hover:border-accent transition-colors"
+            >
+              <Github size={16} />
+            </a>
+            <a
+              href="https://twitter.com"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Twitter / X"
+              className="flex items-center justify-center h-9 w-9 rounded-full border border-border text-muted-foreground hover:text-accent hover:border-accent transition-colors"
+            >
+              <Twitter size={16} />
+            </a>
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-primary-foreground/20 text-center text-sm opacity-80">
-          <p>&copy; {new Date().getFullYear()} JanMitram. All rights reserved.</p>
+        <div className="border-t border-border py-6">
+          <p className="text-center text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} JanMitram. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
